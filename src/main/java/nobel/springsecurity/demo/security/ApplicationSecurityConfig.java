@@ -31,9 +31,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
             2- Each request, sends the username and password in the header of it.
          */
         http
+                .csrf().disable()           //TODO
                 .authorizeRequests()
-                .antMatchers("/", "/index", "/css/*", "/js/*")
-                .permitAll()
+                .antMatchers("/", "/index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/students/**").hasRole(UserRole.ADMIN.name()) // Role based authentication
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -44,11 +45,23 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     protected UserDetailsService userDetailsService() {
         UserDetails userDetails = User.builder()
-                                    .username("username")
-                                    .password(passwordEncoder.encode("password"))
-                                    .roles("STUDENT")
+                                    .username("student")
+                                    .password(passwordEncoder.encode("123"))
+                                    .roles(UserRole.STUDENT.name())   // ROLE_STUDENT
                                     .build();
 
-        return new InMemoryUserDetailsManager(userDetails);
+        UserDetails ahmedDetails = User.builder()
+                                    .username("ahmed")
+                                    .password(passwordEncoder.encode("123"))
+                                    .roles(UserRole.ADMIN.name())     // ROLE_ADMIN
+                                    .build();
+
+        UserDetails tomDetails = User.builder()
+                .username("tom")
+                .password(passwordEncoder.encode("123"))
+                .roles(UserRole.ADMINTRAINEE.name())     // ROLE_ADMINTRAINEE
+                .build();
+
+        return new InMemoryUserDetailsManager(userDetails, ahmedDetails);
     }
 }
