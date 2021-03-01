@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +33,9 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
             2- Each request, sends the username and password in the header of it.
          */
         http
-                .csrf().disable()           //TODO
+                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
+//                .csrf().disable()
                 .authorizeRequests()
                 /**
                  * antMatchers order matter, the first antMatcher that hits the api endpoint will return the boolean
