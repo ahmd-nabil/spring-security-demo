@@ -34,11 +34,15 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()           //TODO
                 .authorizeRequests()
+                /**
+                 * antMatchers order matter, the first antMatcher that hits the api endpoint will return the boolean
+                 * @PreAuthorize can be used at method level in the Controller class, but antMatchers is preferred
+                 * */
                 .antMatchers("/", "/index", "/css/*", "/js/*").permitAll()
 //                .antMatchers("/students/**").hasRole(UserRole.ADMIN.name()) // Role based authentication
                 .antMatchers(HttpMethod.POST, "/students/**").hasAuthority(UserPermission.STUDENT_WRITE.name())
-                .antMatchers(HttpMethod.PUT, "/students/**").hasAuthority(UserPermission.STUDENT_WRITE.name())
-                .antMatchers(HttpMethod.DELETE, "/students/**").hasAuthority(UserPermission.STUDENT_WRITE.name())
+                .antMatchers(HttpMethod.PUT, "/students/**").hasRole(UserRole.ADMIN.name())
+                .antMatchers(HttpMethod.DELETE, "/students/**").hasRole(UserRole.ADMIN.name())
                 .antMatchers(HttpMethod.GET, "/students/**").hasAnyRole(UserRole.ADMIN.name(), UserRole.ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
