@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
 @EnableWebSecurity
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -51,7 +53,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                     .loginPage("/login").permitAll()
-                    .defaultSuccessUrl("/students", true);
+                    .defaultSuccessUrl("/students", true)
+                .and()
+                .rememberMe()
+                    .key("SomeSoStrongAndSecureKey")
+                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21));
     }
 
     @Override
