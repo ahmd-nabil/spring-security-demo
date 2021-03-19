@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -33,12 +32,12 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
             2- Each request, sends the username and password in the header of it.
          */
         http
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .and()
-//                .csrf().disable()
+//                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//                .and()
+                .csrf().disable()
                 .authorizeRequests()
                 /**
-                 * antMatchers order matter, the first antMatcher that hits the api endpoint will return the boolean
+                 * antMatchers order matters, the first antMatcher that hits the api endpoint will return the boolean
                  * @PreAuthorize can be used at method level in the Controller class, but antMatchers is preferred
                  * */
                 .antMatchers("/", "/index", "/css/*", "/js/*").permitAll()
@@ -50,7 +49,9 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+                .formLogin()
+                    .loginPage("/login").permitAll()
+                    .defaultSuccessUrl("/students", true);
     }
 
     @Override
