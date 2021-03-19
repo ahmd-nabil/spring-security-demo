@@ -57,7 +57,18 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .rememberMe()
                     .key("SomeSoStrongAndSecureKey")
-                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21));
+                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21))
+                .and()
+                /**
+                 * Best practice is to use POST for any request that changes the state of application (i.e. logout)
+                 * to prevent CSRF attacks
+                 * */
+                .logout()
+                    .logoutUrl("/logout")
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login");
     }
 
     @Override
