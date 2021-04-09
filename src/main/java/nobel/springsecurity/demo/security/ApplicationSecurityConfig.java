@@ -1,6 +1,8 @@
 package nobel.springsecurity.demo.security;
 
 import nobel.springsecurity.demo.auth.ApplicationUserService;
+import nobel.springsecurity.demo.jwt.JwtTokenVerifier;
+import nobel.springsecurity.demo.jwt.JwtUsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,9 +11,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableWebSecurity
@@ -39,41 +40,46 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 //                .and()
                 .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(new JwtUsernamePasswordAuthenticationFilter(authenticationManager()))
+                .addFilterAfter(new JwtTokenVerifier(), JwtUsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 /**
                  * antMatchers order matters, the first antMatcher that hits the api endpoint will return the boolean
                  * @PreAuthorize can be used at method level in the Controller class, but antMatchers is preferred
                  * */
-                .antMatchers("/", "/index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/", "/index", "/css/*", "/js/*", "/login").permitAll()
 //                .antMatchers("/students/**").hasRole(UserRole.ADMIN.name()) // Role based authentication
                 .antMatchers(HttpMethod.POST, "/students/**").hasAuthority(UserPermission.STUDENT_WRITE.name())
                 .antMatchers(HttpMethod.PUT, "/students/**").hasRole(UserRole.ADMIN.name())
                 .antMatchers(HttpMethod.DELETE, "/students/**").hasRole(UserRole.ADMIN.name())
                 .antMatchers(HttpMethod.GET, "/students/**").hasAnyRole(UserRole.ADMIN.name(), UserRole.ADMINTRAINEE.name())
                 .anyRequest()
-                .authenticated()
-                .and()
-                .formLogin()
-                    .loginPage("/login").permitAll()
-                    .usernameParameter("username")
-                    .passwordParameter("password")
-                    .defaultSuccessUrl("/students", true)
-                .and()
-                .rememberMe()
-                    .key("SomeSoStrongAndSecureKey")
-                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21))
-                    .rememberMeParameter("remember-me")
-                .and()
-                /**
-                 * Best practice is to use POST for any request that changes the state of application (i.e. logout)
-                 * to prevent CSRF attacks
-                 * */
-                .logout()
-                    .logoutUrl("/logout")
-                    .clearAuthentication(true)
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID", "remember-me")
-                    .logoutSuccessUrl("/login");
+                .authenticated();
+
+//                .and()
+//                .formLogin()
+//                    .loginPage("/login").permitAll()
+//                    .usernameParameter("username")
+//                    .passwordParameter("password")
+//                    .defaultSuccessUrl("/students", true)
+//                .and()
+//                .rememberMe()
+//                    .key("SomeSoStrongAndSecureKey")
+//                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21))
+//                    .rememberMeParameter("remember-me")
+//                .and()
+//                /**
+//                 * Best practice is to use POST for any request that changes the state of application (i.e. logout)
+//                 * to prevent CSRF attacks
+//                 * */
+//                .logout()
+//                    .logoutUrl("/logout")
+//                    .clearAuthentication(true)
+//                    .invalidateHttpSession(true)
+//                    .deleteCookies("JSESSIONID", "remember-me")
+//                    .logoutSuccessUrl("/login");
     }
 
     @Override
